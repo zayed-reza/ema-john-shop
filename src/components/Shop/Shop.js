@@ -3,6 +3,7 @@ import Cart from '../Cart/Cart';
 import Product from '../Product/Product';
 import { addToDb, getStoredCart } from '../../utilities/fakedb';
 import './Shop.css';
+import { Link } from 'react-router-dom';
 
 const Shop = () => {
     const [products, setProducts] = useState([]);
@@ -34,8 +35,20 @@ const Shop = () => {
             setCart(storedCart);
         }
     }, [products])
+
+
     const handleAddToCart = (product) => {
-        const newCart = [...cart, product];
+        const exist = cart.find(pd => pd.key !== product.key);
+        let newCart = [];
+        if (exist) {
+            const rest = cart.filter(pd => pd.key !== product.key);
+            exist.quantity = exist.quantity + 1;
+            newCart = [...rest, product]
+        }
+        else {
+            product.quantity = 1;
+            newCart = [...cart, product];
+        }
         setCart(newCart);
         addToDb(product.key);
     }
@@ -46,12 +59,15 @@ const Shop = () => {
         const matchedProducts = products.filter(product => product.name.toLowerCase().includes(searchText.toLowerCase()));
         setDisplayProducts(matchedProducts);
     }
+
+
     return (
         <div>
             <div className="seach-container">
                 <input type="text"
                     onChange={handleSearch} placeholder="Search Product" />
             </div>
+
             <div className="shop-container">
                 <div className="product-container">
                     {
@@ -63,10 +79,14 @@ const Shop = () => {
                         </Product>)
                     }
                 </div>
-                <div className="cart-container">
-                    <Cart cart={cart}></Cart>
-                </div>
 
+                <div className="cart-container">
+                    <Cart cart={cart}>
+                        <Link to="/review">
+                            <button className="btn-regular">Review Your Order</button>
+                        </Link>
+                    </Cart>
+                </div>
             </div>
         </div>
     );
